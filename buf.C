@@ -106,6 +106,9 @@ const Status BufMgr::allocBuf(int &frame)
     }
 
     // Might need to reset buffer description table here
+    bufTable[clockHand].Clear();
+
+    frame = clockHand;
 
     return OK;
 }
