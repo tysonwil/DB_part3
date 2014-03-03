@@ -105,9 +105,10 @@ const Status BufMgr::allocBuf(int &frame)
         bufTable[clockHand].file->writePage(bufTable[clockHand].pageNo, &bufPool[clockHand]);
     }
 
-    // Might need to reset buffer description table here
+    // Reset frame entry.
     bufTable[clockHand].Clear();
 
+    // Return new frame.
     frame = clockHand;
 
     return OK;
@@ -119,18 +120,17 @@ const Status BufMgr::readPage(File* file, const int PageNo, Page*& page)
     int frameNumber = 0;
 
     // Check to see if the page is already in the buffer pool.
-    try {
-        hashTable->lookup(file, PageNo, frameNumber);
+    if (hashTable->lookup(file, PageNo, frameNumber) != HASHNOTFOUND) {
 
         // Page is in buffer pool. Reference bit and pinCnt are updated.
         bufTable[frameNumber].refbit = true;
         bufTable[frameNumber].pinCnt++;
         page = &bufPool[frameNumber];
     }
-    catch(Error e) {
+    else {
         // Page is NOT in the buffer pool.
 
-        // Allocate a new frame.
+        // Allocate a new frame and get frameNumber.
         allocBuf(frameNumber);
 
         // Read page into the new frame created above.
@@ -257,5 +257,3 @@ void BufMgr::printSelf(void)
         cout << endl;
     };
 }
-
-
