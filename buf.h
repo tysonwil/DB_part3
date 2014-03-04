@@ -1,3 +1,10 @@
+// Tianchu Hunang - 906 257 9744
+// Tim Zodrow - 906 516 7760
+// Tyson Williams - 906 352 9276
+// The purpose of this file is to define the method calls of
+// the hash table and buff manager as well as initialize
+// all the required parameters needed to run the buffer manager
+
 #ifndef BUF_H
 #define BUF_H
 

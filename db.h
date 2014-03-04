@@ -1,3 +1,10 @@
+// Tianchu Hunang - 906 257 9744
+// Tim Zodrow - 906 516 7760
+// Tyson Williams - 906 352 9276
+// The purpose of this file is to define the method calls of
+// the database as well as initialize
+// all the required parameters needed to run the database
+
 #ifndef DB_H
 #define DB_H
 

@@ -1,3 +1,8 @@
+# Tianchu Hunang - 906 257 9744
+# Tim Zodrow - 906 516 7760
+# Tyson Williams - 906 352 9276
+
+
 #
 # Makefile for the test programs
 #

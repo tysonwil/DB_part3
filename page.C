@@ -1,3 +1,9 @@
+// Tianchu Hunang - 906 257 9744
+// Tim Zodrow - 906 516 7760
+// Tyson Williams - 906 352 9276
+// The purpose of this file is to define the methods of
+// the page class
+
 #include <sys/types.h>
 #include <functional>
 #include <string>

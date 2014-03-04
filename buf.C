@@ -1,3 +1,9 @@
+// Tianchu Hunang - 906 257 9744
+// Tim Zodrow - 906 516 7760
+// Tyson Williams - 906 352 9276
+// The purpose of this file is to define the inner logic of the BufMgr
+// function calls. 
+
 #include <memory.h>
 #include <unistd.h>
 #include <errno.h>
@@ -62,6 +68,10 @@ BufMgr::~BufMgr() {
     delete [] bufPool;
 }
 
+// allocBuf takes a reference to a frame number and looks for an
+// open frame in the buffer based on the valid bit, ref bit, and pinCnt.
+// Returns the status of the function call, OK if it was successful, 
+// BUFFEREXCEEDED if the buffer was full, ERROR status if error occured.
 
 const Status BufMgr::allocBuf(int &frame) 
 {
@@ -108,16 +118,17 @@ const Status BufMgr::allocBuf(int &frame)
         }
     }
 
-    // Reset frame entry.
-    // bufTable[clockHand].Clear();
-
     // Return new frame.
     frame = clockHand;
 
     return OK;
 }
 
-  
+// readPage takes a file pointer, a page number, and a reference to a page.
+// It will look to see if the page is in the Hash Table, otherwise it will
+// call a read file on the file pointer and then store a reference to the 
+// page in the page reference and return a status. If status is OK, it was
+// successful, if ERROR occured, it will return that status error.
 const Status BufMgr::readPage(File* file, const int PageNo, Page*& page)
 {
     int frameNumber = 0;
@@ -159,7 +170,11 @@ const Status BufMgr::readPage(File* file, const int PageNo, Page*& page)
     return OK;
 }
 
-
+// unPinPage will take a file pointer, a page number, and dirty bit.
+// It will remove the page from the hash table and it will set the dirty
+// bit on the buffer if the dirty bit was true and it will decrement the
+// pin count on the buffer. If successful, it will return OK, if the pinCnt was
+// 0, then PAGENOTPINNED will be returned, and on ERROR, it will return the error.
 const Status BufMgr::unPinPage(File* file, const int PageNo, const bool dirty) 
 {
     int frameNumber = 0;
@@ -183,6 +198,12 @@ const Status BufMgr::unPinPage(File* file, const int PageNo, const bool dirty)
     return OK;
 }
 
+// allocPage will take a file pointer, a reference to a page number, and
+// a reference to a page pointer. It will allocate the page in the file,
+// then it will create a buffer frame for the page, and insert it into 
+// the hash table. It will set the page number and page reference as outputs.
+// If successful, it will return OK, otherwise on ERROR it will return the 
+// error status.
 const Status BufMgr::allocPage(File* file, int& pageNo, Page*& page) 
 {
     int frameNumber = 0;
