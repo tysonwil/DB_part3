@@ -67,6 +67,7 @@ const Status BufMgr::allocBuf(int &frame)
 {
     bool frameFound = false;
     int numScanned = 0;
+    Status s;
 
     // Start scanning for an open frame. We need to scan twice in case
     // if all frames have their reference bit set.
@@ -102,11 +103,13 @@ const Status BufMgr::allocBuf(int &frame)
 
     // If page is dirty, it needs to be written back to disk.
     if (bufTable[clockHand].dirty) {
-        bufTable[clockHand].file->writePage(bufTable[clockHand].pageNo, &bufPool[clockHand]);
+        if((s = bufTable[clockHand].file->writePage(bufTable[clockHand].pageNo, &bufPool[clockHand])) != OK){
+            return s;
+        }
     }
 
     // Reset frame entry.
-    bufTable[clockHand].Clear();
+    // bufTable[clockHand].Clear();
 
     // Return new frame.
     frame = clockHand;
@@ -118,9 +121,10 @@ const Status BufMgr::allocBuf(int &frame)
 const Status BufMgr::readPage(File* file, const int PageNo, Page*& page)
 {
     int frameNumber = 0;
+    Status s;
 
     // Check to see if the page is already in the buffer pool.
-    if (hashTable->lookup(file, PageNo, frameNumber) != HASHNOTFOUND) {
+    if (hashTable->lookup(file, PageNo, frameNumber) == OK) {
 
         // Page is in buffer pool. Reference bit and pinCnt are updated.
         bufTable[frameNumber].refbit = true;
@@ -131,17 +135,25 @@ const Status BufMgr::readPage(File* file, const int PageNo, Page*& page)
         // Page is NOT in the buffer pool.
 
         // Allocate a new frame and get frameNumber.
-        allocBuf(frameNumber);
+        if((s = allocBuf(frameNumber)) != OK){
+            return s;
+        }
 
         // Read page into the new frame created above.
-        file->readPage(PageNo, page);
-        bufPool[frameNumber] = *page;
+        if((s = file->readPage(PageNo, &bufPool[frameNumber])) != OK){
+            return s;
+        }
+
+        //bufPool[frameNumber] = *page;
 
         // Update the hash table.
-        hashTable->insert(file, PageNo, frameNumber);
+        if((s = hashTable->insert(file, PageNo, frameNumber)) != OK){
+            return s;
+        }
 
         // Properly setup this frame.
         bufTable[frameNumber].Set(file, PageNo);
+        page = &bufPool[frameNumber];
     }
 
     return OK;
@@ -151,9 +163,12 @@ const Status BufMgr::readPage(File* file, const int PageNo, Page*& page)
 const Status BufMgr::unPinPage(File* file, const int PageNo, const bool dirty) 
 {
     int frameNumber = 0;
+    Status s;
     // Retrieve page from the hash table. (in order to get frameNumber)
     // Throws HASHNOTFOUND if not found.
-    hashTable->lookup(file, PageNo, frameNumber);
+    if((s = hashTable->lookup(file, PageNo, frameNumber)) != OK){
+        return s;
+    }
 
     // Mark the page as dirty if necessary.
     if (dirty == true)
@@ -171,15 +186,22 @@ const Status BufMgr::unPinPage(File* file, const int PageNo, const bool dirty)
 const Status BufMgr::allocPage(File* file, int& pageNo, Page*& page) 
 {
     int frameNumber = 0;
+    Status s;
 
     // Allocate an empty page in the specified file and return pageNo.
-    file->allocatePage(pageNo);
+    if((s = file->allocatePage(pageNo)) != OK){
+        return s;
+    }
 
     // Obtain a buffer pool frame and return frameNumber.
-    allocBuf(frameNumber);
+    if((s = allocBuf(frameNumber)) != OK){
+        return s;
+    }
 
     // Insert entry into hash table.
-    hashTable->insert(file, pageNo, frameNumber);
+    if((s = hashTable->insert(file, pageNo, frameNumber)) != OK){
+        return s;
+    }
 
     // Setup this new frame.
     bufTable[frameNumber].Set(file, pageNo);

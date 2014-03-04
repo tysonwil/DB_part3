@@ -1,4 +1,4 @@
-1#include <sys/types.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <stdio.h>
@@ -10,7 +10,7 @@
 
 #define CALL(c)    { Status s; \
                      if ((s = c) != OK) { \
-		       cerr << "At line " << __LINE__ << ":" << endl << "  "; \
+		                   cerr << "At line " << __LINE__ << ":" << endl << "  "; \
                        error.print(s); \
                        cerr << "TEST DID NOT PASS" <<endl; \
                        exit(1); \
@@ -23,8 +23,8 @@
                      cerr << "This call should fail: " #c << endl; \
                      cerr << "TEST DID NOT PASS" <<endl; \
                      exit(1); \
-		     } \
-		     }
+        		     } \
+        		    }
 
 BufMgr*     bufMgr;
 
@@ -125,8 +125,11 @@ int main()
       pageno = j[random() % num];
       CALL(bufMgr->readPage(file1, pageno, page));
       sprintf((char*)&cmp, "test.1 Page %d %7.1f", pageno, (float)pageno);
-      ASSERT(memcmp(page, &cmp, strlen((char*)&cmp)) == 0);
+      cout << "Page: ";
       cout << (char*)page << endl;
+      cout << "CMP: ";
+      cout << (char*)cmp << endl;
+      ASSERT(memcmp(page, &cmp, strlen((char*)&cmp)) == 0);
       CALL(bufMgr->readPage(file2, pageno2, page2));
       sprintf((char*)&cmp, "test.2 Page %d %7.1f", pageno2, (float)pageno2);
       ASSERT(memcmp(page2, &cmp, strlen((char*)&cmp)) == 0);
